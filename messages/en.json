@@ -1,0 +1,35 @@
+{
+  "home": {
+    "title": "Boards"
+  },
+  "signin": {
+    "title": "Sign In",
+    "form": {
+      "title": "Sign In",
+      "description": "Signin with Google or Github profile",
+      "buttons": {
+        "signinWithGoogle": "Signin with Google",
+        "signinWithGithub": "Signin with Github"
+      },
+      "developedBy": "Developed by <link>@emrecunlu</link>"
+    }
+  },
+  "account": "Account",
+  "logout": "Logout",
+  "language": "Language",
+  "theme": "Theme",
+  "languages": {
+    "tr": "Turkish",
+    "en": "English"
+  },
+  "themes": {
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
+  },
+  "errors": {
+    "error": "Error",
+    "unknown": "Unknown error",
+    "userNotFound": "User not found, please login again"
+  }
+}
