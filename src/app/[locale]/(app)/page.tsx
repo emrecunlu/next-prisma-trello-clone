@@ -1,7 +1,5 @@
 import { getAll } from "@/actions/board.action";
-import CreateBoardForm from "@/components/board/create-board-form";
-import { Button } from "@/components/ui/button";
-import { auth, signIn, signOut } from "@/lib/auth";
+import BoardList from "@/components/board/board-list";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -17,10 +15,8 @@ export default async function Home() {
   const boards = await getAll();
 
   return (
-    <div className="p-4">
-      <CreateBoardForm />
-
-      <pre>{JSON.stringify(boards, null, 2)}</pre>
-    </div>
+    <main className="h-[calc(100vh-theme(spacing.12))] overflow-hidden">
+      <BoardList boards={boards} />
+    </main>
   );
 }
