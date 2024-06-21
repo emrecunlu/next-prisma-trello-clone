@@ -54,9 +54,14 @@ export default function CreateBoardForm() {
   }
 
   return (
-    <Card className="w-80 p-2">
+    <Card className="w-80 p-2 h-min">
       <form onSubmit={handleSubmit} ref={formRef} className="grid space-y-2">
-        <Input placeholder="Enter list title..." ref={inputRef} autoFocus />
+        <Input
+          placeholder="Enter list title..."
+          className="focus:bg-secondary"
+          ref={inputRef}
+          autoFocus
+        />
 
         <div className="flex items-center space-x-1">
           <Button type="submit">Add list</Button>

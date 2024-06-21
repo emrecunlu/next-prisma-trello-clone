@@ -1,5 +1,7 @@
 import { getAll } from "@/actions/board.action";
+import BoardCard from "@/components/board/board-card";
 import BoardList from "@/components/board/board-list";
+import CreateBoardForm from "@/components/board/create-board-form";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -15,8 +17,8 @@ export default async function Home() {
   const boards = await getAll();
 
   return (
-    <main className="h-[calc(100vh-theme(spacing.12))] overflow-hidden">
+    <div className="h-[calc(100vh-theme(spacing.12))]">
       <BoardList boards={boards} />
-    </main>
+    </div>
   );
 }

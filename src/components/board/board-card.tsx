@@ -5,11 +5,12 @@ import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { deleteById, update } from "@/actions/board.action";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import CreateTaskForm from "../task/create-task-form";
+import TaskCard from "../task/task-card";
 
 type Props = {
   board: Board;
@@ -64,15 +65,21 @@ export default function BoardCard({ board }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.value = board.title;
+    }
+  }, [board.title]);
+
   return (
-    <Card className="w-80 p-2 grid space-y-2">
+    <Card className="w-80 p-2 flex flex-col space-y-2 h-min max-h-full">
       <form
         onSubmit={handleSubmit}
         className="flex items-center space-x-1"
         ref={formRef}
       >
         <Input
-          className="flex-1 font-semibold border-0 cursor-pointer focus:cursor-auto shadow-none"
+          className="flex-1 font-semibold border-0 cursor-pointer focus:cursor-auto shadow-none focus:bg-secondary"
           defaultValue={board.title}
           ref={inputRef}
           onKeyDown={handleKeyDown}
@@ -88,7 +95,15 @@ export default function BoardCard({ board }: Props) {
         </Button>
       </form>
 
-      <CreateTaskForm />
+      {board.tasks.length > 0 && (
+        <div className="w-full overflow-y-auto flex flex-col space-y-2">
+          {board.tasks.map((task, index) => (
+            <TaskCard key={index} task={task} boardId={board.id} />
+          ))}
+        </div>
+      )}
+
+      <CreateTaskForm boardId={board.id} />
     </Card>
   );
 }
