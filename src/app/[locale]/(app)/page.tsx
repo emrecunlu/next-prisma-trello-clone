@@ -17,7 +17,7 @@ export default async function Home() {
   const boards = await getAll();
 
   return (
-    <div className="h-[calc(100vh-theme(spacing.12))]">
+    <div className="h-[calc(100vh-theme(spacing.12))] overflow-hidden">
       <BoardList boards={boards} />
     </div>
   );

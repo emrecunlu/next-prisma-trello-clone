@@ -1,7 +1,12 @@
 "use server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { ActionResult, Board, UpdateBoardDto } from "@/types/types";
+import {
+  ActionResult,
+  Board,
+  ReoderBoardDto,
+  UpdateBoardDto,
+} from "@/types/types";
 import { tryCatch } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import { getTranslations } from "next-intl/server";
@@ -19,6 +24,11 @@ const deleteSchema = z.object({
 const updateSchema = z.object({
   id: z.string().cuid(),
   title: z.string().min(1).max(30),
+});
+
+const orderSchema = z.object({
+  id: z.string().cuid(),
+  order: z.number(),
 });
 
 const reorder = async (userId: string, tx: Prisma.TransactionClient) => {
@@ -181,6 +191,44 @@ export async function update(updateBoardDto: UpdateBoardDto) {
           title: data.title,
         },
       });
+
+      revalidatePath("/");
+
+      return {
+        success: true,
+      };
+    });
+  });
+}
+
+export async function updateOrder(reorderBoardDto: ReoderBoardDto) {
+  return tryCatch(() => {
+    return prisma.$transaction(async (tx): Promise<ActionResult> => {
+      const t = await getTranslations();
+      const session = await auth();
+
+      if (!session) throw new Error(t("errors.userNotFound"));
+
+      const { error, data } = await orderSchema.safeParseAsync(reorderBoardDto);
+
+      if (error) {
+        const message = error.errors.flatMap((x) => x.message).join(",\n");
+
+        throw new Error(message);
+      }
+
+      const from = await tx.board.findFirst({
+        where: { userId: session.user?.id, id: data.id },
+      });
+
+      const to = await tx.board.findFirst({
+        where: { userId: session.user?.id, order: data.order },
+      });
+
+      if (!from || !to) throw new Error(t("errors.boardNotFound"));
+
+      await tx.board.update({ where: from, data: { order: to.order } });
+      await tx.board.update({ where: to, data: { order: from.order } });
 
       revalidatePath("/");
 
