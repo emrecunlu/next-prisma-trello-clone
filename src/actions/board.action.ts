@@ -27,14 +27,17 @@ const updateSchema = z.object({
 });
 
 const orderSchema = z.object({
-  id: z.string().cuid(),
-  order: z.number(),
+  source: z.number(),
+  destination: z.number(),
 });
 
 const reorder = async (userId: string, tx: Prisma.TransactionClient) => {
   const boards = await tx.board.findMany({
     where: {
       userId,
+    },
+    orderBy: {
+      order: "asc",
     },
   });
 
@@ -217,18 +220,30 @@ export async function updateOrder(reorderBoardDto: ReoderBoardDto) {
         throw new Error(message);
       }
 
-      const from = await tx.board.findFirst({
-        where: { userId: session.user?.id, id: data.id },
+      const boards = await tx.board.findMany({
+        where: {
+          userId: session.user?.id,
+        },
+        orderBy: {
+          order: "asc",
+        },
       });
 
-      const to = await tx.board.findFirst({
-        where: { userId: session.user?.id, order: data.order },
-      });
+      if (boards.length - 1 < Math.max(data.destination, data.source))
+        throw new Error(t("errors.boardNotFound"));
 
-      if (!from || !to) throw new Error(t("errors.boardNotFound"));
+      const [deleted] = boards.splice(data.source, 1);
+      boards.splice(data.destination, 0, deleted);
 
-      await tx.board.update({ where: from, data: { order: to.order } });
-      await tx.board.update({ where: to, data: { order: from.order } });
+      await Promise.all(
+        boards.map(
+          async (board, index) =>
+            await tx.board.update({
+              where: board,
+              data: { order: index + 1 },
+            })
+        )
+      );
 
       revalidatePath("/");
 

@@ -29,7 +29,7 @@ export type Task = {
 
 export type CreateUserDto = Omit<User, "id">;
 
-export type ReoderBoardDto = Omit<Board, "title" | "tasks">;
+export type ReoderBoardDto = { source: number; destination: number };
 export type UpdateBoardDto = Omit<Board, "order" | "tasks">;
 
 export type UpdateTaskDto = Omit<Task, "order">;

@@ -12,6 +12,8 @@ import {
 import { useEffect, useState } from "react";
 import { DraggableType } from "@/types/enums";
 import { updateOrder } from "@/actions/board.action";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 type Props = {
   boards: Board[];
@@ -19,6 +21,8 @@ type Props = {
 
 export default function BoardList({ boards }: Props) {
   const [optimisticBoards, setOptimisticBoards] = useState<Board[]>(boards);
+
+  const t = useTranslations();
 
   const handleDragEnd = async (dropResult: DropResult) => {
     const { destination, source } = dropResult;
@@ -40,9 +44,18 @@ export default function BoardList({ boards }: Props) {
       setOptimisticBoards(list);
 
       const result = await updateOrder({
-        id: from.id,
-        order: to.order,
+        destination: destination.index,
+        source: source.index,
       });
+
+      if (!result.success) {
+        setOptimisticBoards(boards);
+
+        toast(t("errors.error"), {
+          description: result.message ?? "",
+        });
+      }
+    } else if (dropResult.type === DraggableType.TASK) {
     }
   };
 
@@ -67,16 +80,13 @@ export default function BoardList({ boards }: Props) {
                 disableInteractiveElementBlocking
               >
                 {(provided, snapshot) => (
-                  <>
-                    <BoardCard
-                      key={index}
-                      ref={provided.innerRef}
-                      board={board}
-                      isDragOver={snapshot.isDragging}
-                      dragHandleProps={provided.dragHandleProps}
-                      draggableProps={provided.draggableProps}
-                    />
-                  </>
+                  <BoardCard
+                    ref={provided.innerRef}
+                    board={board}
+                    isDragOver={snapshot.isDragging}
+                    dragHandleProps={provided.dragHandleProps}
+                    draggableProps={provided.draggableProps}
+                  />
                 )}
               </Draggable>
             ))}
