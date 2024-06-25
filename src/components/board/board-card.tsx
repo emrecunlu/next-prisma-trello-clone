@@ -17,6 +17,7 @@ import {
   type DraggableProvided,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { DraggableType } from "@/types/enums";
 
 type Props = {
   board: Board;
@@ -112,6 +113,31 @@ export const BoardCard = forwardRef<HTMLDivElement, Props>(
             <Cross2Icon />
           </Button>
         </form>
+
+        <Droppable droppableId={board.id} type={DraggableType.TASK}>
+          {(provided) => (
+            <div
+              className="flex-1 space-y-2"
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {board.tasks.map((task, index) => (
+                <Draggable key={task.id} index={index} draggableId={task.id}>
+                  {(provided) => (
+                    <TaskCard
+                      dragHandleProps={provided.dragHandleProps}
+                      draggableProps={provided.draggableProps}
+                      task={task}
+                      ref={provided.innerRef}
+                    />
+                  )}
+                </Draggable>
+              ))}
+
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
 
         <CreateTaskForm boardId={board.id} />
       </Card>

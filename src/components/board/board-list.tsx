@@ -29,7 +29,11 @@ export default function BoardList({ boards }: Props) {
 
     if (!destination || !source) return;
 
-    if (destination.index === source.index) return;
+    if (
+      destination.index === source.index &&
+      destination.droppableId === source.droppableId
+    )
+      return;
 
     if (dropResult.type === DraggableType.BOARD) {
       const from = optimisticBoards.at(source.index);
@@ -56,6 +60,25 @@ export default function BoardList({ boards }: Props) {
         });
       }
     } else if (dropResult.type === DraggableType.TASK) {
+      const list = Array.from(optimisticBoards);
+      const board = list.find((x) => x.id === source.droppableId);
+      const destinationBoard = list.find(
+        (x) => x.id === destination.droppableId
+      );
+
+      if (!board || !destinationBoard) return;
+
+      const [deleted] = board.tasks.splice(source.index, 1);
+
+      if (destination.droppableId === source.droppableId) {
+        board.tasks.splice(destination.index, 0, deleted);
+
+        setOptimisticBoards(list);
+
+        return;
+      }
+
+      destinationBoard.tasks.splice(destination.index, 0, deleted);
     }
   };
 
