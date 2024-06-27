@@ -18,6 +18,7 @@ import {
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import { DraggableType } from "@/types/enums";
+import { useOptimisticBoards } from "@/context/optimistic-boards-provider";
 
 type Props = {
   board: Board;
@@ -26,6 +27,7 @@ type Props = {
 
 export const BoardCard = forwardRef<HTMLDivElement, Props>(
   ({ board, dragHandleProps, draggableProps, isDragOver }, ref) => {
+    const { setBoards, boards } = useOptimisticBoards();
     const t = useTranslations();
 
     const formRef = useRef<HTMLFormElement | null>(null);
@@ -59,6 +61,8 @@ export const BoardCard = forwardRef<HTMLDivElement, Props>(
     };
 
     const handleDelete = async () => {
+      setBoards(boards.filter((x) => x.id !== board.id));
+
       const result = await deleteById(board.id);
 
       if (!result.success) {
@@ -117,16 +121,24 @@ export const BoardCard = forwardRef<HTMLDivElement, Props>(
         <Droppable droppableId={board.id} type={DraggableType.TASK}>
           {(provided) => (
             <div
-              className="flex-1 space-y-2"
+              className="flex-1 grid overflow-auto -mx-2 px-2 space-y-2"
               {...provided.droppableProps}
               ref={provided.innerRef}
             >
               {board.tasks.map((task, index) => (
-                <Draggable key={task.id} index={index} draggableId={task.id}>
-                  {(provided) => (
+                <Draggable
+                  key={task.id}
+                  index={index}
+                  draggableId={task.id}
+                  isDragDisabled={task.id === "-"}
+                  shouldRespectForcePress
+                >
+                  {(provided, snapshot) => (
                     <TaskCard
+                      isDragging={snapshot.isDragging}
                       dragHandleProps={provided.dragHandleProps}
                       draggableProps={provided.draggableProps}
+                      boardId={board.id}
                       task={task}
                       ref={provided.innerRef}
                     />

@@ -1,10 +1,19 @@
-import { ActionResult } from "@/types/types";
+import { ActionResult, Board, Task } from "@/types/types";
 import { type ClassValue, clsx } from "clsx";
+import _ from "lodash";
 import { getTranslations } from "next-intl/server";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function reorder(list: any[], start: number, end: number) {
+  const result = Array.from(list);
+  const [removed] = result.splice(start, 1);
+  result.splice(end, 0, removed);
+
+  return result;
 }
 
 export async function tryCatch<T>(

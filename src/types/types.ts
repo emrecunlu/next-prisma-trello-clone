@@ -32,6 +32,9 @@ export type CreateUserDto = Omit<User, "id">;
 export type ReoderBoardDto = { source: number; destination: number };
 export type UpdateBoardDto = Omit<Board, "order" | "tasks">;
 
+export type ReorderTaskDto = Omit<Task, "description"> & {
+  boardId: string;
+};
 export type UpdateTaskDto = Omit<Task, "order">;
 export type CreateTaskDto = Omit<Task, "id" | "order"> & {
   boardId: string;

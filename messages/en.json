@@ -34,6 +34,7 @@
     "unknown": "Unknown error",
     "boardNotFound": "Board not found",
     "taskNotFound": "Task not found",
-    "userNotFound": "User not found, please login again"
+    "userNotFound": "User not found, please login again",
+    "invalidTaskOrder": "Invalid task order position"
   }
 }

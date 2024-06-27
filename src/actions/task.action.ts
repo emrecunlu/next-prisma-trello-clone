@@ -3,7 +3,12 @@
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { tryCatch } from "@/lib/utils";
-import { ActionResult, CreateTaskDto, UpdateTaskDto } from "@/types/types";
+import {
+  ActionResult,
+  CreateTaskDto,
+  ReorderTaskDto,
+  UpdateTaskDto,
+} from "@/types/types";
 import { Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -21,6 +26,12 @@ const deleteSchema = z.object({
 const updateSchema = z.object({
   id: z.string().cuid(),
   description: z.string().min(1).max(100),
+});
+
+const orderSchema = z.object({
+  boardId: z.string().cuid(),
+  id: z.string().cuid(),
+  order: z.number(),
 });
 
 const reorder = async (boardId: string, tx: Prisma.TransactionClient) => {
@@ -166,6 +177,29 @@ export const updateById = (updateTaskDto: UpdateTaskDto) => {
       });
 
       revalidatePath("/");
+
+      return {
+        success: true,
+      };
+    });
+  });
+};
+
+export const updateOrder = (reorderTaskDto: ReorderTaskDto) => {
+  return tryCatch(() => {
+    return prisma.$transaction(async (tx): Promise<ActionResult> => {
+      const t = await getTranslations();
+      const session = await auth();
+
+      if (!session) throw new Error(t("errors.userNotFound"));
+
+      const { data, error } = await orderSchema.safeParseAsync(reorderTaskDto);
+
+      if (error) {
+        const message = error.errors.flatMap((x) => x.message).join(",\n");
+
+        throw new Error(message);
+      }
 
       return {
         success: true,

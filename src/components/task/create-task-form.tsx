@@ -9,12 +9,14 @@ import { useOnClickOutside } from "usehooks-ts";
 import { create } from "@/actions/task.action";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useOptimisticBoards } from "@/context/optimistic-boards-provider";
 
 type Props = {
   boardId: string;
 };
 
 export default function CreateTaskForm({ boardId }: Props) {
+  const { boards, setBoards } = useOptimisticBoards();
   const t = useTranslations();
 
   const [formVisibility, setFormVisibility] =
@@ -31,6 +33,18 @@ export default function CreateTaskForm({ boardId }: Props) {
     const description = textAreaRef.current.value;
 
     formRef.current?.reset();
+
+    const list = Array.from(boards);
+    const board = list.find((x) => x.id === boardId);
+
+    if (board)
+      board.tasks.push({
+        id: "-",
+        order: board.tasks.length + 1,
+        description,
+      });
+
+    setBoards(list);
 
     const result = await create({
       boardId,

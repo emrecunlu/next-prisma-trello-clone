@@ -10,8 +10,10 @@ import { Input } from "../ui/input";
 import { create } from "@/actions/board.action";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useOptimisticBoards } from "@/context/optimistic-boards-provider";
 
 export default function CreateBoardForm() {
+  const { setBoards, boards } = useOptimisticBoards();
   const t = useTranslations();
   const [formVisibility, setFormVisibility] =
     useState<FormVisibility>("hidden");
@@ -27,6 +29,16 @@ export default function CreateBoardForm() {
     if (!title || title?.length === 0) return;
 
     formRef.current?.reset();
+
+    setBoards([
+      ...boards,
+      {
+        id: "-",
+        order: boards.length + 1,
+        tasks: [],
+        title,
+      },
+    ]);
 
     const result = await create(title);
 

@@ -2,83 +2,71 @@
 
 import CreateBoardForm from "./create-board-form";
 import { BoardCard } from "./board-card";
-import { Board } from "@/types/types";
 import {
   DragDropContext,
   Draggable,
   Droppable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { useEffect, useState } from "react";
 import { DraggableType } from "@/types/enums";
-import { updateOrder } from "@/actions/board.action";
-import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { updateOrder } from "@/actions/board.action";
+import { reorder } from "@/lib/utils";
+import { useOptimisticBoards } from "@/context/optimistic-boards-provider";
+import { toast } from "sonner";
+import _ from "lodash";
 
-type Props = {
-  boards: Board[];
-};
-
-export default function BoardList({ boards }: Props) {
-  const [optimisticBoards, setOptimisticBoards] = useState<Board[]>(boards);
-
+export default function BoardList() {
+  const { boards, setBoards } = useOptimisticBoards();
   const t = useTranslations();
 
-  const handleDragEnd = async (dropResult: DropResult) => {
-    const { destination, source } = dropResult;
-
-    if (!destination || !source) return;
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination || !result.source) return;
 
     if (
-      destination.index === source.index &&
-      destination.droppableId === source.droppableId
+      result.destination.index === result.source.index &&
+      result.destination.droppableId === result.source.droppableId
     )
       return;
 
-    if (dropResult.type === DraggableType.BOARD) {
-      const from = optimisticBoards.at(source.index);
-      const to = optimisticBoards.at(destination.index);
+    if (result.type === DraggableType.BOARD) {
+      setBoards(reorder(boards, result.source.index, result.destination.index));
 
-      if (!from || !to) return;
-
-      const list = Array.from(optimisticBoards);
-      const [reorder] = list.splice(source.index, 1);
-
-      list.splice(destination.index, 0, reorder);
-      setOptimisticBoards(list);
-
-      const result = await updateOrder({
-        destination: destination.index,
-        source: source.index,
+      const response = await updateOrder({
+        destination: result.destination.index,
+        source: result.source.index,
       });
 
-      if (!result.success) {
-        setOptimisticBoards(boards);
+      if (!response.success) {
+        setBoards(boards);
 
         toast(t("errors.error"), {
-          description: result.message ?? "",
+          description: response.message,
         });
       }
-    } else if (dropResult.type === DraggableType.TASK) {
-      const list = Array.from(optimisticBoards);
-      const board = list.find((x) => x.id === source.droppableId);
-      const destinationBoard = list.find(
-        (x) => x.id === destination.droppableId
-      );
+    } else if (result.type === DraggableType.TASK) {
+      const list = Array.from(boards);
+      const board = _.find(list, { id: result.source.droppableId });
+      const toBoard = _.find(list, { id: result.destination.droppableId });
 
-      if (!board || !destinationBoard) return;
+      if (!board || !toBoard) return;
 
-      const [deleted] = board.tasks.splice(source.index, 1);
-
-      if (destination.droppableId === source.droppableId) {
-        board.tasks.splice(destination.index, 0, deleted);
-
-        setOptimisticBoards(list);
+      if (result.destination.droppableId === result.source.droppableId) {
+        const ordered = reorder(
+          board.tasks,
+          result.source.index,
+          result.destination.index
+        );
+        board.tasks = ordered;
+        setBoards(list);
 
         return;
       }
 
-      destinationBoard.tasks.splice(destination.index, 0, deleted);
+      const [removed] = board.tasks.splice(result.source.index, 1);
+      toBoard.tasks.splice(result.destination.index, 0, removed);
+
+      setBoards(list);
     }
   };
 
@@ -95,11 +83,12 @@ export default function BoardList({ boards }: Props) {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {optimisticBoards.map((board, index) => (
+            {boards.map((board, index) => (
               <Draggable
-                key={index}
+                key={board.id}
                 index={index}
-                draggableId={index.toString()}
+                draggableId={board.id}
+                isDragDisabled={board.id === "-"}
                 disableInteractiveElementBlocking
               >
                 {(provided, snapshot) => (
