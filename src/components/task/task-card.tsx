@@ -137,10 +137,10 @@ export const TaskCard = forwardRef<HTMLDivElement, Props>(
             <DropdownMenuContent>
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => setHasEdit(true)}>
-                  Edit
+                  {t("edit")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDelete}>
-                  Delete
+                  {t("delete")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>

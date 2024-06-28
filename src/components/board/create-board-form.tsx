@@ -60,7 +60,7 @@ export default function CreateBoardForm() {
         onClick={() => setFormVisibility("visible")}
       >
         <PlusIcon className="me-2" />
-        Add another list
+        {t("board.create.addAnotherList")}
       </Button>
     );
   }
@@ -69,14 +69,14 @@ export default function CreateBoardForm() {
     <Card className="w-80 p-2 h-min">
       <form onSubmit={handleSubmit} ref={formRef} className="grid space-y-2">
         <Input
-          placeholder="Enter list title..."
+          placeholder={t("board.create.listTitlePlaceholder")}
           className="focus:bg-secondary"
           ref={inputRef}
           autoFocus
         />
 
         <div className="flex items-center space-x-1">
-          <Button type="submit">Add list</Button>
+          <Button type="submit">{t("board.create.addList")}</Button>
           <Button
             variant="ghost"
             size="icon"

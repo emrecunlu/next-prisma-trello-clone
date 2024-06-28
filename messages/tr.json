@@ -3,6 +3,51 @@
     "title": "Panolar"
   },
   "signin": {
-    "title": "Giriş Yap"
+    "title": "Giriş Yap",
+    "form": {
+      "title": "Giriş Yap",
+      "description": "Google veya Github profili ile giriş yap",
+      "buttons": {
+        "signinWithGoogle": "Google ile Giriş Yap",
+        "signinWithGithub": "Github ile Giriş Yap"
+      },
+      "developedBy": "<link>@emrecunlu</link> tarafından geliştirildi"
+    }
+  },
+  "board": {
+    "create": {
+      "addAnotherList": "Yeni Pano Ekle",
+      "addList": "Pano Ekle",
+      "listTitlePlaceholder": "Pano başlığı giriniz..."
+    }
+  },
+  "card": {
+    "create": {
+      "addAnotherCard": "Task Ekle",
+      "addCard": "Yeni Task Ekle"
+    }
+  },
+  "account": "Hesabım",
+  "logout": "Çıkış Yap",
+  "language": "Dil",
+  "theme": "Tema",
+  "edit": "Düzenle",
+  "delete": "Sil",
+  "languages": {
+    "tr": "Türkçe",
+    "en": "İngilizce"
+  },
+  "themes": {
+    "dark": "Karanlık",
+    "light": "Açık",
+    "system": "Sistem"
+  },
+  "errors": {
+    "error": "Hata",
+    "unknown": "Bilinmeyen bir hata oluştu",
+    "boardNotFound": "Pano bulunamadı",
+    "taskNotFound": "Task bulunamadı",
+    "userNotFound": "Kullanıcı bulunamadı, lütfen yeniden giriş yapınız",
+    "invalidTaskOrder": "Hatalı task sıralaması"
   }
 }

@@ -10,63 +10,101 @@ import {
 } from "@hello-pangea/dnd";
 import { DraggableType } from "@/types/enums";
 import { useTranslations } from "next-intl";
-import { updateOrder } from "@/actions/board.action";
-import { reorder } from "@/lib/utils";
 import { useOptimisticBoards } from "@/context/optimistic-boards-provider";
+import { updateOrder } from "@/actions/board.action";
+import { updateOrder as updateTaskOrder } from "@/actions/task.action";
 import { toast } from "sonner";
-import _ from "lodash";
 
 export default function BoardList() {
   const { boards, setBoards } = useOptimisticBoards();
   const t = useTranslations();
 
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination || !result.source) return;
+    const { source, destination } = result;
+
+    if (!source || !destination) return;
 
     if (
-      result.destination.index === result.source.index &&
-      result.destination.droppableId === result.source.droppableId
+      source.index === destination.index &&
+      source.droppableId === destination.droppableId
     )
       return;
 
     if (result.type === DraggableType.BOARD) {
-      setBoards(reorder(boards, result.source.index, result.destination.index));
+      const boardId = result.draggableId;
+      const order = destination.index + 1;
+
+      const reorderList = Array.from(boards);
+      const [removed] = reorderList.splice(source.index, 1);
+      reorderList.splice(destination.index, 0, removed);
+
+      setBoards(reorderList);
 
       const response = await updateOrder({
-        destination: result.destination.index,
-        source: result.source.index,
+        id: boardId,
+        order,
       });
 
       if (!response.success) {
-        setBoards(boards);
-
         toast(t("errors.error"), {
-          description: response.message,
+          description: response.message ?? "",
         });
       }
     } else if (result.type === DraggableType.TASK) {
-      const list = Array.from(boards);
-      const board = _.find(list, { id: result.source.droppableId });
-      const toBoard = _.find(list, { id: result.destination.droppableId });
+      const isSameBoard = source.droppableId === destination.droppableId;
 
-      if (!board || !toBoard) return;
+      if (isSameBoard) {
+        const boardIndex = boards.findIndex((x) => x.id === source.droppableId);
 
-      if (result.destination.droppableId === result.source.droppableId) {
-        const ordered = reorder(
-          board.tasks,
-          result.source.index,
-          result.destination.index
+        if (boardIndex === -1) return;
+
+        const reorderList = Array.from(boards);
+        const [removed] = reorderList[boardIndex].tasks.splice(source.index, 1);
+        reorderList[boardIndex].tasks.splice(destination.index, 0, removed);
+
+        setBoards(reorderList);
+
+        const response = await updateTaskOrder({
+          boardId: source.droppableId,
+          order: destination.index + 1,
+          taskId: result.draggableId,
+        });
+
+        if (!response.success) {
+          toast(t("errors.error"), {
+            description: response.message ?? "",
+          });
+        }
+      } else {
+        const boardIndex = boards.findIndex((x) => x.id === source.droppableId);
+        const destinationBoardIndex = boards.findIndex(
+          (x) => x.id === destination.droppableId
         );
-        board.tasks = ordered;
-        setBoards(list);
 
-        return;
+        if (boardIndex === -1 || destinationBoardIndex === -1) return;
+
+        const reorderList = Array.from(boards);
+        const [removed] = reorderList[boardIndex].tasks.splice(source.index, 1);
+        reorderList[destinationBoardIndex].tasks.splice(
+          destination.index,
+          0,
+          removed
+        );
+
+        setBoards(reorderList);
+
+        const response = await updateTaskOrder({
+          boardId: destination.droppableId,
+          order: destination.index + 1,
+          taskId: result.draggableId,
+        });
+
+        if (!response.success) {
+          toast(t("errors.error"), {
+            description: response.message ?? "",
+          });
+        }
       }
-
-      const [removed] = board.tasks.splice(result.source.index, 1);
-      toBoard.tasks.splice(result.destination.index, 0, removed);
-
-      setBoards(list);
     }
   };
 

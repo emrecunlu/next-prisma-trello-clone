@@ -14,6 +14,19 @@
       "developedBy": "Developed by <link>@emrecunlu</link>"
     }
   },
+  "board": {
+    "create": {
+      "addAnotherList": "Add another list",
+      "addList": "Add List",
+      "listTitlePlaceholder": "Enter list title..."
+    }
+  },
+  "card": {
+    "create": {
+      "addAnotherCard": "Add Card",
+      "addCard": "Add a card"
+    }
+  },
   "account": "Account",
   "logout": "Logout",
   "language": "Language",

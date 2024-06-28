@@ -9,6 +9,9 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: "/images/trello.png",
+  },
   title: {
     template: "%s | Trello",
     default: "Trello",

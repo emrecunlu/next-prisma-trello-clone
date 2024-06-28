@@ -75,7 +75,7 @@ export default function CreateTaskForm({ boardId }: Props) {
         className="flex items-center gap-x-1.5 justify-start"
       >
         <PlusIcon />
-        Add a card
+        {t("card.create.addCard")}
       </Button>
     );
   }
@@ -89,7 +89,7 @@ export default function CreateTaskForm({ boardId }: Props) {
         onKeyDown={handleKeyDown}
       />
       <div className="flex items-center space-x-1">
-        <Button type="submit">Add card</Button>
+        <Button type="submit">{t("card.create.addAnotherCard")}</Button>
         <Button
           size="icon"
           variant="ghost"
